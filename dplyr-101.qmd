@@ -4,6 +4,7 @@ author: "Fabrice Rossi"
 format: 
   html:
     code-fold: true
+  pdf: default
 ---
 
 ```{r}
@@ -314,3 +315,31 @@ white_wine |>
 ```
 Now it works.
 
+### Group by
+```{r}
+white_wine |>
+  summarise(median(`residual sugar`),
+            n(),
+            .by = quality) |>
+arrange(quality)
+```
+There are seven values for quality (3 up to 9). The `summary()` function identified the values for quality. Then, it split the dataset into independent subsets for each quality value. Then, on each of the subsets, it applied the `median()` function by calculating the median. Then, it compiled all the results into a table. The `arrange()` function will arrange the quality from lower to higher. The `nl()` function is a summary function will show the size/number of observations of each group.
+
+We divide alcohol content into high and low. For each subset, we calculate the median of residual sugar and compute the number of observations:
+```{r}
+white_wine |>
+  mutate(high_alcohol = alcohol >= 13) |>
+  summarise(median(`residual sugar`),
+            n(),
+            .by = high_alcohol)
+```
+This is an example of the practicality of such tools for hypotheses testing.
+
+We can choose our own definition for classification but in a more complex way through `cut()` and `breaks`:
+```{r}
+white_wine |>
+  mutate(alcohol_class = cut(alcohol, breaks=c(7, 9, 10, 12, 13, 15)) ) |>
+  summarise(median(`residual sugar`),
+            n(),
+            .by = alcohol_class)
+```
