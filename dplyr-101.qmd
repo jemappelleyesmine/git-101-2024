@@ -268,6 +268,7 @@ white_wine |>
     normalized_alcohol_robust = (alcohol - median(alcohol))/IQR(alcohol),
          .keep = "none")
 ```
+`.keep = none` is to remove the other values.
 
 If we want to understand the difference in result between the robust standardization and normal standardization, we can:
 ```{r}
@@ -278,3 +279,38 @@ white_wine |>
             IQR(alcohol))
 ```
 The distribution is not gaussian (we can see that in the graph above) so it will not be summarized properly by the standard deviation, which is why it gives a different result from the normalization with IQR.
+
+### More complex summary functions
+Essentially `quantile()`.
+
+```{r}
+quantile(white_wine$`residual sugar`)
+```
+You get a vector which has names (such as 0%). You get a second vector that contains the minimum value, the maximum value, the median and the two other quartiles.
+
+You can change the percentage values using the `probs` parameter:
+```{r}
+quantile(white_wine$`residual sugar`, probs = seq(0, 1, 0.1))
+```
+This shows the extreme skewedness of the distribution towards the right.
+
+```{r}
+mean(white_wine$`residual sugar`)
+```
+So the median is 5.2 while the mean is 6.4.
+
+There is a problem of extension compatibility with `quantile()` in the context of `summarise()` and `mutate()`:
+```{r}
+white_wine |>
+  summarise(quantile(`residual sugar`))
+```
+It works but R is complaining because we did not use `reframe()` and used `summarise()` instead.
+
+So we use `reframe()`:
+```{r}
+white_wine |>
+  reframe(quantile(`residual sugar`),
+          mean(`residual sugar`))
+```
+Now it works.
+
